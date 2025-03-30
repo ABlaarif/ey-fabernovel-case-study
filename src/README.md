@@ -15,7 +15,7 @@ This project addresses a 3-part data engineering challenge using Python and Goog
 
 ---
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - Python (Pandas, Seaborn, Matplotlib)
 - Google Cloud Platform: Cloud Storage, BigQuery
