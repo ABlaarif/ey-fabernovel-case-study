@@ -31,15 +31,25 @@ This case study demonstrates a full data engineering workflow involving:
 ##  3. Project Structure
 
 ey-fabernovel-case-study/
+
 │
+
 ├──  fetch_products_to_gcs.py         # Python script to extract Fake Store API data
+
 │
-├── bigquery/
-│   ├── star_schema.sql                  # SQL scripts to create fact/dimension tables
+
+├── sql/
+
+│       └─── star_schema.sql                  # SQL scripts to create fact/dimension tables
+
 ├── notebooks/
-│   └── churn_analysis.ipynb             # Exploratory notebook for churn analysis
+
+│           └── churn_analysis.ipynb             # Exploratory notebook for churn analysis
+
 │
+
 ├── EY Fabernovel – Data Engineering Case Study.pdf  # Final report
+
 └── README.md
 
 
