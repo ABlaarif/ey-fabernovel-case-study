@@ -1,6 +1,6 @@
 # EY / Fabernovel Data Engineering Case Study
 
-## 🧠 Project Overview
+##  Project Overview
 
 This project addresses a 3-part data engineering challenge using Python and Google Cloud:
 
@@ -25,7 +25,7 @@ This project addresses a 3-part data engineering challenge using Python and Goog
 
 ---
 
-## 🧪 Business Questions Answered
+##  Business Questions Answered
 
 1. **Customer Purchase Patterns**  
    Identify top customers and seasonal purchase trends.
