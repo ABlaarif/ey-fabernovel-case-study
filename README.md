@@ -87,24 +87,22 @@ All transformations use SQL in BigQuery with appropriate joins, parsing, and unn
 
 ---
 
-##  6. Business Questions
 
-The following questions were explored using SQL:
 
 1. **Customer Behavior**  
-   - Which countries, regions, and cities are most active?
+   
 
 2. **Product Performance**  
-   - What are the top-selling products and categories?
+   
 
 3. **Traffic Source Effectiveness**  
-   - Which sources and mediums drive the most conversions?
+  
 
 4. **User Engagement Segmentation**  
-   - How do session metrics vary by engagement type?
+   
 
 5. **Churn Rate Analysis**  
-   - What is the churn rate per month? How does retention evolve?
+   
 
 ---
 
