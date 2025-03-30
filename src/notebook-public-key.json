@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "ey-fabernovel-use-case",
+  "private_key_id": "77eddc3d3a857c62b7947d9b7bccecfffc4cfe88",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQClTPK+uFSAuLDe\nkxxWV+rwQ3wmO0T9uYnp72t2t15hcqr3DfBi80MpYHsPctVF7Dq6WFGw7DNFN7Mf\nmM5VpZ2oUhy3t745x3bhH9FsllecV8jbRzWdTqOxgDl5utvCDevzUCw0NqBgj/1H\nyhVxebTj6qjRV8bUrwbs8a+aNBUygjpCXI7L837TrjtUfUbIFAO/4dMeWwvVTU5E\nMD5qDbkNbS8unYwwoFy6H/Kp0eWglJCfWmL7KUIpNVlYgRI+LLbUWINuM64yvFu5\nBR/fyEt4gw+DjZ/cZGznQTLhSomxC5XfyXN0JlgAxiYmWGfRYWrSdeVYBSEzLI0z\nlXrDoQHpAgMBAAECggEASgNKLVsbewc3KnF0HrT+3NVaoUOogHKy7avl0iIIgFl3\nc2cqWyPQzpYEg8ZG+Cfto8In0a/wxO1LprokqPSewt8BPMFoyzYkZGh6vMQUNkyY\nApa/ys+LO87N7VNdUmYpX6hmInrTFGlkXuB8+XIlLGfFbvZ+cHxt/Wm51rG7TAGL\nEoMe6BQzONhLBYir/vRiuefDtajXJAqKLIG/ndQP6A/tnc9anjrSkZieGe/bifty\nEp6UD7dml1ylUnQPwSA9TrqS2XvLpt2zsD+SudFgBj9C2Ig9KjUAOTpaSe9kP0Fg\nhslmhXH3smjP15ndNbK4T4rvOLjbCoSMpJWpxE+cgQKBgQDSI751syQH0d0kBmXd\nHBYNaitp38KiOmNyw6y+XrKuZiqdbpsL+YVH9py5Ys6ElUe7+J7laAgpLkBfT8Ef\nTjV1Ykr2xht3x2EEP5/HYpcBVIX5V8SSVDStWhGXi9G+ymYqYFHqxQKvYvQlUEgK\nbsZ0zt2zleXqj3Y2ZdWmRUlvLwKBgQDJYBlW+afdEeiB96fe23KkIkDmnWdyJaWd\nmqbZYgGWRdSqefbXejLxetSa01CFq1gILN5UIfcG/AueVZRhBnBt+3napkqyoJjO\njwDRbYXupUBJnDHU+nz82FSQ95X7WVYjHxD2RNcw0FiLTS9zTc7DvlTsxWbJu7l8\nsPl+SD2aZwKBgQCapV928vzjHFjoOCUi0ZaRDL8iTV/JT7r8LHCmML7ChcF61nkY\nGOszCJRSAhsFi26dMNyO6z6GP9lzyxfO2BmTZ2DPtv9j6MDHBaOqci269t8ZnrO1\nFG8n3A7yPh1/kSgaq4PdiFrvg501EJ3Tv64hLFQP45KuSiGu6saOdJMUVQKBgFnm\npylnJ4PQXOa4857Qhau1BxhtqSMSn49u3ZIq6N53qmu5K3QjP98CoSvFrysdxZ1Q\nuqkAyNG7cExtlGKEh2jyXgI5PxvkCpQcz5avuJ1D9SFns++LLIWM5qQZhEHELmpb\nkiz/qrpGKWF3QfnOAMLuk+docW0ae8KpF5lDEw19AoGBAKW7FNWqRqcFX0zfjWOa\nyUJ8PhJYPg8Sq6m6haTxerBf8Ycj5AOJJnWB6TBlq0ZkIBhHTVt6GGZII7YlGoEH\nKrjtDXX4kavuZEBr/mcYdcMAEq8SmfepTygmqCiRl0bkZg4eRgSymtOejFNpu3jf\n60L0rb5C0f6HpgSuQnkXG8YG\n-----END PRIVATE KEY-----\n",
+  "client_email": "notebook-reader@ey-fabernovel-use-case.iam.gserviceaccount.com",
+  "client_id": "109887597316346614583",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/notebook-reader%40ey-fabernovel-use-case.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
