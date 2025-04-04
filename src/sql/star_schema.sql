@@ -1,70 +1,140 @@
--- Create the fact_sessions table
--- This is the main fact table that captures core session-level metrics, user behavior, and traffic data.
-CREATE OR REPLACE TABLE analytics_star_schema.fact_sessions AS
+-- Create or replace the fact_sessions table (1 year of data, fully cleaned and enhanced)
+CREATE OR REPLACE TABLE `ey-fabernovel-use-case.analytics_star_schema.fact_sessions` AS
 SELECT
-  fullVisitorId AS user_id,                          -- Unique identifier for the user
-  visitId AS session_id,                             -- Unique identifier for the session
-  PARSE_DATE('%Y%m%d', date) AS session_date,        -- Session date parsed to DATE format
-  totals.pageviews,                                  -- Total number of pageviews in the session
-  totals.hits AS total_hits,                         -- Total number of hits (pageviews, events, etc.)
-  IFNULL(totals.transactionRevenue / 1e6, 0) AS revenue_usd, -- Revenue in USD (converted from micros)
-  device.deviceCategory,                             -- Device category (e.g., desktop, mobile)
-  trafficSource.source,                              -- Traffic source (e.g., google, direct)
-  trafficSource.medium                               -- Traffic medium (e.g., organic, referral)
-FROM `bigquery-public-data.google_analytics_sample.ga_sessions_*`
-WHERE _TABLE_SUFFIX BETWEEN '20160801' AND '20170731'; -- Filters data between August 2016 and July 2017
+  -- Visitor and session identifiers
+  fullVisitorId,                             -- Unique ID for the user
+  visitId,                                   -- Unique ID for the session
+  visitStartTime,                            -- Timestamp of the session start
+  PARSE_DATE('%Y%m%d', date) AS session_date, -- Parsed session date
+  visitNumber,                               -- Session number for the user
 
--- Create the dim_users table
--- Dimension table with geographic attributes for each user
-CREATE OR REPLACE TABLE analytics_star_schema.dim_users AS
+  -- Session-level totals (cleaned and casted)
+  SAFE_CAST(totals.visits AS INT64) AS session_count,     -- Number of visits (must be > 0)
+  SAFE_CAST(totals.hits AS INT64) AS total_hits,          -- Total number of hits in session
+  SAFE_CAST(totals.pageviews AS INT64) AS pageviews,      -- Number of pageviews in session
+  SAFE_CAST(IFNULL(totals.transactions, 0) AS INT64) AS transactions, -- Total transactions
+  SAFE_CAST(IFNULL(totals.transactionRevenue, 0) AS FLOAT64) / 1e6 AS revenue_usd, -- Revenue in USD
+
+  -- Flags derived from behavior
+  IF(SAFE_CAST(totals.transactionRevenue AS FLOAT64) > 0, 1, 0) AS is_transaction, -- 1 if session had revenue
+  IF(SAFE_CAST(totals.bounces AS INT64) = 1, 1, 0) AS bounce,                      -- 1 if session was a bounce
+
+  -- Time features for behavior analysis
+  FORMAT_DATE('%A', PARSE_DATE('%Y%m%d', date)) AS day_of_week,   -- Day name (e.g., Monday)
+  FORMAT_DATE('%B', PARSE_DATE('%Y%m%d', date)) AS month_name,    -- Month name (e.g., January)
+  EXTRACT(HOUR FROM TIMESTAMP_SECONDS(visitStartTime)) AS hour_of_day, -- Hour of session 
+
+  -- Device information (cleaned and normalized)
+  LOWER(TRIM(IFNULL(device.deviceCategory, 'unknown'))) AS device_category,     -- Device type
+  LOWER(TRIM(IFNULL(device.operatingSystem, 'unknown'))) AS operating_system,   -- OS used
+
+  -- Geolocation (title-cased country name)
+  INITCAP(IFNULL(geoNetwork.country, 'unknown')) AS country,     -- User country
+
+  -- Traffic source information (cleaned)
+  LOWER(TRIM(IFNULL(trafficSource.source, 'unknown'))) AS source,   -- Traffic source
+  LOWER(TRIM(IFNULL(trafficSource.medium, 'unknown'))) AS medium    -- Traffic medium
+
+FROM `bigquery-public-data.google_analytics_sample.ga_sessions_*`
+
+-- Only include 1 full year of data
+WHERE
+  _TABLE_SUFFIX BETWEEN '20160801' AND '20170731'
+
+-- Exclude incomplete or invalid sessions
+  AND SAFE_CAST(totals.visits AS INT64) IS NOT NULL
+  AND SAFE_CAST(totals.visits AS INT64) > 0
+  AND fullVisitorId IS NOT NULL
+  AND visitId IS NOT NULL;
+
+
+
+
+
+
+
+
+
+
+
+
+-- Create the date dimension table from distinct session dates
+CREATE OR REPLACE TABLE `ey-fabernovel-use-case.analytics_star_schema.dim_date` AS
 SELECT
-  fullVisitorId AS user_id,                          -- Unique user ID
-  geoNetwork.country,                                -- User's country
-  geoNetwork.region,                                 -- User's region/state
-  geoNetwork.city,                                   -- User's city
-  geoNetwork.continent,                              -- User's continent
-  geoNetwork.subContinent                            -- Sub-continent information
-FROM `bigquery-public-data.google_analytics_sample.ga_sessions_*`
-GROUP BY user_id, country, region, city, continent, subContinent;
+  session_date AS date,                               -- The actual session date
+  EXTRACT(DAY FROM session_date) AS day,              -- Day of the month
+  EXTRACT(MONTH FROM session_date) AS month,          -- Month number (1–12)
+  EXTRACT(YEAR FROM session_date) AS year,            -- Year
+  FORMAT_DATE('%A', session_date) AS day_name,        -- Weekday name (e.g., Monday)
+  FORMAT_DATE('%B', session_date) AS month_name,      -- Month name (e.g., January)
+  EXTRACT(WEEK FROM session_date) AS week_number      -- Week number of the year
+FROM `ey-fabernovel-use-case.analytics_star_schema.fact_sessions`
+GROUP BY session_date;
 
--- Create the dim_device table
--- Dimension table describing devices used during sessions
-CREATE OR REPLACE TABLE analytics_star_schema.dim_device AS
+
+
+
+
+
+
+
+
+
+-- Create user dimension with session and revenue summaries
+CREATE OR REPLACE TABLE `ey-fabernovel-use-case.analytics_star_schema.dim_users` AS
+SELECT
+  fullVisitorId,                                      -- Unique user ID
+  COUNT(DISTINCT visitId) AS total_sessions,          -- Total number of sessions
+  COUNTIF(is_transaction = 1) AS converting_sessions, -- Number of sessions with purchases
+  SUM(pageviews) AS total_pageviews,                  -- Total pages viewed
+  SUM(transactions) AS total_transactions,            -- Total transactions
+  ROUND(SUM(revenue_usd), 2) AS total_revenue         -- Total revenue in USD
+FROM `ey-fabernovel-use-case.analytics_star_schema.fact_sessions`
+GROUP BY fullVisitorId;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Create device dimension with distinct device + OS combos
+CREATE OR REPLACE TABLE `ey-fabernovel-use-case.analytics_star_schema.dim_device` AS
 SELECT DISTINCT
-  device.deviceCategory,                             -- Device type (desktop, tablet, mobile)
-  device.browser,                                    -- Web browser used
-  device.operatingSystem,                            -- OS of the device
-  device.isMobile                                    -- Boolean indicating if device is mobile
-FROM `bigquery-public-data.google_analytics_sample.ga_sessions_*`;
+  device_category,     -- Device type (e.g., mobile, desktop)
+  operating_system     -- OS used (e.g., iOS, Android, Windows)
+FROM `ey-fabernovel-use-case.analytics_star_schema.fact_sessions`;
 
--- Create the dim_traffic table
--- Dimension table detailing how users arrived at the site
-CREATE OR REPLACE TABLE analytics_star_schema.dim_traffic AS
+
+
+
+
+-- Create traffic dimension to capture distinct traffic sources and mediums
+CREATE OR REPLACE TABLE `ey-fabernovel-use-case.analytics_star_schema.dim_traffic` AS
 SELECT DISTINCT
-  trafficSource.source,                              -- Source of traffic (e.g., Google)
-  trafficSource.medium,                              -- Medium (e.g., organic, referral)
-  channelGrouping                                    -- High-level channel grouping
-FROM `bigquery-public-data.google_analytics_sample.ga_sessions_*`;
+  source,     -- Traffic source (e.g., google, newsletter)
+  medium      -- Traffic medium (e.g., cpc, organic, referral)
+FROM `ey-fabernovel-use-case.analytics_star_schema.fact_sessions`;
 
--- Create the dim_date table
--- Date dimension to support time-based analysis
-CREATE OR REPLACE TABLE analytics_star_schema.dim_date AS
-SELECT DISTINCT
-  PARSE_DATE('%Y%m%d', date) AS session_date,        -- Parsed session date
-  EXTRACT(YEAR FROM PARSE_DATE('%Y%m%d', date)) AS year,   -- Year
-  EXTRACT(MONTH FROM PARSE_DATE('%Y%m%d', date)) AS month, -- Month
-  FORMAT_DATE('%A', PARSE_DATE('%Y%m%d', date)) AS day_of_week -- Day of the week (e.g., Monday)
-FROM `bigquery-public-data.google_analytics_sample.ga_sessions_*`;
 
--- Create the session_products bridge table
--- Bridge table to link sessions with the products purchased
+
+-- Create session_products bridge table
 CREATE OR REPLACE TABLE analytics_star_schema.session_products AS
 SELECT
-  fullVisitorId AS user_id,                          -- Unique user ID
-  visitId AS session_id,                             -- Session ID
-  h.product.v2ProductName AS product_name,           -- Name of the product purchased
-  h.product.v2ProductCategory AS product_category,   -- Category of the product
-  h.product.productRevenue / 1e6 AS product_revenue_usd -- Revenue per product in USD
+  fullVisitorId AS user_id,
+  visitId AS session_id,
+  h.product.v2ProductName AS product_name,
+  h.product.v2ProductCategory AS product_category,
+  h.product.productRevenue / 1e6 AS product_revenue_usd
 FROM `bigquery-public-data.google_analytics_sample.ga_sessions_*`,
-UNNEST(hits) AS h                                     -- Unnest hits to access product-level details
-WHERE h.type = 'TRANSACTION';                         -- Filter only transactions
+UNNEST(hits) AS h
+WHERE h.type = 'TRANSACTION';
